@@ -1,0 +1,8 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/telegram/:splat"
+  status = 200
