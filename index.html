@@ -224,6 +224,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sa
 .close-x:active{transform:scale(0.92)}
 #error-box{position:fixed;top:0;left:0;right:0;background:#f85149;color:#fff;padding:10px;z-index:99999;font-size:11px;font-family:monospace;max-height:40%;overflow:auto;word-break:break-all;display:none}
 #error-box.show{display:block}
+/* Второе меню */
+#screen-menu2{background:radial-gradient(ellipse at center,#1a2233 0%,#0a0e14 70%)}
+#screen-menu2 .menu-content{gap:16px}
+/* Событие "Пакетик" */
+.event-bag-img{font-size:80px;margin-bottom:10px;animation:float 3s infinite;filter:drop-shadow(0 0 20px rgba(255,255,255,0.4))}
+.event-title{font-size:22px;font-weight:800;color:var(--gold);margin-bottom:4px}
+.event-desc{font-size:14px;color:var(--text);margin-bottom:16px}
+.event-progress{background:var(--surface2);padding:16px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08)}
+.event-progress-header{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px}
+.event-bar{height:12px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--surface3)}
+.event-bar-fill{height:100%;background:linear-gradient(90deg,#f4c430,#f0883e);width:0%;transition:width .3s}
+.event-stock{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
+.event-stock b{color:var(--gold)}
+.sold-out-text{font-size:16px;font-weight:800;color:var(--danger);line-height:1.4}
+.sold-out-text small{display:block;font-size:13px;color:var(--muted);font-weight:500;margin-top:6px}
 </style>
 </head>
 <body>
@@ -239,6 +254,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sa
   <button class="btn btn-block" id="btn-daily-gift" style="position:relative">🎁 Ежедневные подарки<span class="badge" id="gift-badge"></span></button>
   <button class="btn btn-block" id="btn-battlepass" style="position:relative">🎫 Battle Pass<span class="badge" id="bp-badge"></span></button>
   <button class="btn btn-gold btn-block" id="btn-donate">💎 Донат за звёзды</button>
+  <button class="btn btn-primary btn-block" id="btn-menu2">🪐 Второе меню</button>
   <div class="menu-row">
     <button class="btn btn-icon" id="btn-inventory" title="Инвентарь">🎒</button>
     <button class="btn btn-icon" id="btn-shop" title="Магазин">🛍</button>
@@ -248,6 +264,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sa
   </div>
   <div class="crystals-display"><span class="crystal-icon">◆</span><span id="menu-crystals">0</span></div>
 </div></div>
+
+<div class="screen" id="screen-menu2">
+  <div class="menu-content">
+    <div class="logo-wrap" style="animation:none">
+      <div style="font-size:60px;text-align:center;filter:drop-shadow(0 0 20px rgba(88,166,255,0.5))">🪐</div>
+    </div>
+    <h1>Второе меню</h1>
+    <p class="tagline">Особые события и активности</p>
+    <button class="btn btn-primary btn-block" id="btn-menu2-play">▶ Играть</button>
+    <button class="btn btn-gold btn-block" id="btn-menu2-event">🎆 Лимитированный скин</button>
+    <button class="btn btn-block" id="btn-menu2-back" style="margin-top:10px">← Назад</button>
+  </div>
+</div>
 
 <div class="screen" id="screen-game">
   <div class="game-header"><button class="btn btn-icon" id="btn-back">←</button><div class="level-info"><div class="level-num">Уровень <span id="level-num">1</span></div><div class="level-sub"><span id="arrows-left">0</span> стрелок осталось</div></div><button class="btn btn-icon" id="btn-pause">⏸</button></div>
@@ -323,6 +352,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sa
   <div class="dialog-buttons" style="margin-top:12px"><button class="btn" id="btn-bp-close">Закрыть</button></div>
 </div></div>
 
+<div class="overlay" id="overlay-event"><div class="dialog" style="text-align:center;max-width:380px;position:relative">
+  <button class="close-x" id="btn-event-close">✕</button>
+  <div id="event-content"></div>
+</div></div>
+
 <div class="ad-overlay" id="ad-overlay"><div class="ad-label">Реклама</div><div class="ad-timer" id="ad-timer">3</div><div style="text-align:center"><div class="ad-spinner"></div><div class="ad-text">Идёт показ рекламы...</div></div></div>
 <div id="error-box"></div>
 <div id="toast"></div>
@@ -353,7 +387,7 @@ const DIRS = [[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]];
 const FOUR_DIRS = [0,2,4,6];
 const ARROW_COLORS = ['#58a6ff','#79c0ff','#f0883e','#f778ba','#a371f7','#f778ba','#f0883e','#79c0ff'];
 const MIRROR_COLOR = '#f0f6fc';
-const SAVE_KEY = 'arrowPuzzleSave_v9';
+const SAVE_KEY = 'arrowPuzzleSave_v10';
 
 const ACHIEVEMENTS = [
   { id:'first10', name:'Первые шаги', desc:'Пройди 10 уровней', reward:20, icon:'🌱' },
@@ -427,6 +461,7 @@ const DONATE_ITEMS = {
     { id:'prem_candy', name:'Конфетка', desc:'Battle Pass 9 ур.', price:999, form:'candy', icon:'🍬' },
     { id:'prem_firework', name:'Фейерверк', desc:'Battle Pass 10 ур.', price:999, form:'firework', icon:'🎆' },
     { id:'prem_crown', name:'Корона', desc:'Battle Pass 14 ур.', price:999, form:'crown', icon:'👑' },
+    { id:'prem_bag', name:'Пакетик', desc:'Ивентовый скин', price:999, form:'bag', icon:'🛍️' },
   ],
   themes: [
     { id:'prem_cyberpunk', name:'Киберпанк', desc:'Неон + глитч', price:59, theme:'cyberpunk', icon:'🤖' },
@@ -562,6 +597,7 @@ const state = {
   currentInventoryTab:'skins',
   pendingBuy:null,
   bp:newBP(),
+  bagAds: 0, bagClaimed: false, bagSold: 450,
 };
 
 const Sound = (function(){
@@ -612,6 +648,7 @@ function save(){
       shopPurchases:state.shopPurchases,
       undosInventory:state.undosInventory, hintsInventory:state.hintsInventory,
       bp: state.bp,
+      bagAds: state.bagAds, bagClaimed: state.bagClaimed, bagSold: state.bagSold,
     });
     try { localStorage.setItem(SAVE_KEY, data); } catch(e){}
     const cs = getCS();
@@ -644,6 +681,9 @@ function applySaveData(d){
   if (!state.bp.maxLevel) state.bp.maxLevel = state.level || 1;
   if (!state.bp.totalPlaySeconds) state.bp.totalPlaySeconds = 0;
   if (!state.bp.adsWatched) state.bp.adsWatched = 0;
+  state.bagAds = d.bagAds || 0;
+  state.bagClaimed = d.bagClaimed || false;
+  state.bagSold = d.bagSold || 450;
 }
 function load(){
   try { const raw=localStorage.getItem(SAVE_KEY); if (raw) applySaveData(JSON.parse(raw)); } catch(e){}
@@ -804,6 +844,7 @@ function drawShapeOnCanvas(c,cx,cy,size,form,color,time){
     case 'globe': { c.shadowColor='#3fb950'; c.shadowBlur=15; c.fillStyle='#3fb950'; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.strokeStyle='rgba(255,255,255,0.5)'; c.lineWidth=1.2; c.beginPath(); c.ellipse(0,0,size*0.35,size*0.55,0,0,Math.PI*2); c.stroke(); c.beginPath(); c.ellipse(0,0,size*0.6,size*0.25,0,0,Math.PI*2); c.stroke(); } break;
     case 'cloud': { c.shadowColor='#c8d0dc'; c.shadowBlur=15; c.fillStyle='#c8d0dc'; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#7d8590'; c.beginPath(); c.arc(-size*0.1,-size*0.15,size*0.3,0,Math.PI*2); c.arc(size*0.2,-size*0.05,size*0.35,0,Math.PI*2); c.arc(-size*0.15,size*0.2,size*0.28,0,Math.PI*2); c.fill(); } break;
     case 'alarm': { c.shadowColor='#f0883e'; c.shadowBlur=15; c.fillStyle='#f0883e'; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#fff'; c.beginPath(); c.arc(0,0,size*0.55,0,Math.PI*2); c.fill(); c.strokeStyle='#0a0e14'; c.lineWidth=size*0.08; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-size*0.35); c.stroke(); c.beginPath(); c.moveTo(0,0); c.lineTo(size*0.25,-size*0.05); c.stroke(); } break;
+    case 'bag': { c.fillStyle='rgba(255,255,255,0.4)'; c.strokeStyle='#fff'; c.lineWidth=1.5; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.stroke(); } break;
     default: c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='rgba(255,255,255,0.22)'; c.beginPath(); c.moveTo(size*0.9,0); c.lineTo(-size*0.4,size*0.5); c.lineTo(-size*0.15,0); c.lineTo(-size*0.4,-size*0.5); c.closePath(); c.fill();
   }
   c.restore();
@@ -833,6 +874,7 @@ function drawArrowByForm(cx,cy,size,dir,color,form,alpha,scale,glow,pulse,time){
   else if (form==='globe'){ ctx.shadowColor='#3fb950'; ctx.shadowBlur=18; ctx.fillStyle='#3fb950'; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.ellipse(0,0,size*0.35,size*0.55,0,0,Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.ellipse(0,0,size*0.6,size*0.25,0,0,Math.PI*2); ctx.stroke(); }
   else if (form==='cloud'){ ctx.shadowColor='#c8d0dc'; ctx.shadowBlur=18; ctx.fillStyle='#c8d0dc'; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#7d8590'; ctx.beginPath(); ctx.arc(-size*0.1,-size*0.15,size*0.3,0,Math.PI*2); ctx.arc(size*0.2,-size*0.05,size*0.35,0,Math.PI*2); ctx.arc(-size*0.15,size*0.2,size*0.28,0,Math.PI*2); ctx.fill(); }
   else if (form==='alarm'){ ctx.shadowColor='#f0883e'; ctx.shadowBlur=20; ctx.fillStyle='#f0883e'; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(0,0,size*0.55,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='#0a0e14'; ctx.lineWidth=size*0.08; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-size*0.35); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(size*0.25,-size*0.05); ctx.stroke(); }
+  else if (form==='bag'){ ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.stroke(); }
   else { ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill();
     if (!glow&&pulse===0){ ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,0.22)'; ctx.beginPath(); ctx.moveTo(size*0.9,0); ctx.lineTo(-size*0.4,size*0.5); ctx.lineTo(-size*0.15,0); ctx.lineTo(-size*0.4,-size*0.5); ctx.closePath(); ctx.fill(); } }
   ctx.restore();
@@ -1145,6 +1187,7 @@ function makeInventoryCard(item, type){
       : form === 'globe' ? '#3fb950'
       : form === 'cloud' ? '#c8d0dc'
       : form === 'alarm' ? '#f0883e'
+      : form === 'bag' ? '#ffffff'
       : ARROW_COLORS[2];
     drawShapeOnCanvas(m, sz / 2, sz / 2, sz * 0.32, form, color);
     pv.appendChild(mc);
@@ -1450,7 +1493,7 @@ function makeShopCard(it, cur){
     mc.width=sz*dpr; mc.height=sz*dpr; mc.style.width=sz+'px'; mc.style.height=sz+'px';
     const m=mc.getContext('2d'); m.setTransform(dpr,0,0,dpr,0,0);
     const form = it.form || 'classic';
-    const col=form==='neon'?'#79b8ff':form==='gold'?'#f4c430':form==='crystal'?'#b0e0ff':form==='rainbow'?'#f778ba':form==='holo'?'#00ffea':form==='youtube'?'#ff0033':form==='flower'?'#f778ba':form==='candy'?'#f778ba':form==='firework'?'#f4c430':form==='crown'?'#f4c430':form==='nine'?'#58a6ff':form==='globe'?'#3fb950':form==='cloud'?'#c8d0dc':form==='alarm'?'#f0883e':ARROW_COLORS[2];
+    const col=form==='neon'?'#79b8ff':form==='gold'?'#f4c430':form==='crystal'?'#b0e0ff':form==='rainbow'?'#f778ba':form==='holo'?'#00ffea':form==='youtube'?'#ff0033':form==='flower'?'#f778ba':form==='candy'?'#f778ba':form==='firework'?'#f4c430':form==='crown'?'#f4c430':form==='nine'?'#58a6ff':form==='globe'?'#3fb950':form==='cloud'?'#c8d0dc':form==='alarm'?'#f0883e':form==='bag'?'#ffffff':ARROW_COLORS[2];
     drawShapeOnCanvas(m, sz/2, sz/2, sz*0.32, form, col);
     pv.appendChild(mc);
   } else if (isTh){
@@ -1697,12 +1740,108 @@ function giveGiftReward(day){
   toast('🎁 '+g.join(' + '),3000);
 }
 
+// ===== СОБЫТИЕ "ПАКЕТИК" =====
+function renderEvent() {
+  const content = $('#event-content');
+  if (!content) return;
+  const isSoldOut = state.bagSold >= 1000;
+  
+  if (isSoldOut) {
+    content.innerHTML = `
+      <div class="event-bag-img">🛍️</div>
+      <div class="event-title">Пакетик</div>
+      <div class="sold-out-text">
+        Пакетики разобрали :)
+        <small>Ждите новый скин!</small>
+      </div>
+      <div class="dialog-buttons" style="margin-top:20px">
+        <button class="btn" id="btn-event-close-btn">Закрыть</button>
+      </div>
+    `;
+    const btn = $('#btn-event-close-btn');
+    if (btn) btn.addEventListener('click', () => $('#overlay-event').classList.remove('active'));
+    return;
+  }
+
+  if (state.bagClaimed) {
+    content.innerHTML = `
+      <div class="event-bag-img">🛍️</div>
+      <div class="event-title">Пакетик</div>
+      <div class="event-desc">Ты уже получил этот скин!</div>
+      <div class="dialog-buttons" style="margin-top:20px">
+        <button class="btn" id="btn-event-close-btn">Закрыть</button>
+      </div>
+    `;
+    const btn = $('#btn-event-close-btn');
+    if (btn) btn.addEventListener('click', () => $('#overlay-event').classList.remove('active'));
+    return;
+  }
+
+  const progress = Math.min(100, state.bagAds);
+  const leftToWatch = 100 - progress;
+  
+  content.innerHTML = `
+    <div class="event-bag-img">🛍️</div>
+    <div class="event-title">Пакетик</div>
+    <div class="event-desc">Посмотри 100 реклам и получи<br>лимитированный скин «Пакетик»</div>
+    
+    <div class="event-progress">
+      <div class="event-progress-header">
+        <span>Прогресс</span>
+        <span>${progress} / 100</span>
+      </div>
+      <div class="event-bar">
+        <div class="event-bar-fill" style="width: ${progress}%"></div>
+      </div>
+      <div class="event-stock">
+        Всего тираж: <b>${state.bagSold} / 1000</b> штук
+      </div>
+    </div>
+
+    <div class="dialog-buttons">
+      <button class="btn btn-primary" id="btn-event-watch-ad">
+        ▶ Смотреть рекламу (${leftToWatch} осталось)
+      </button>
+      <button class="btn" id="btn-event-close-btn">Закрыть</button>
+    </div>
+  `;
+
+  $('#btn-event-close-btn').addEventListener('click', () => $('#overlay-event').classList.remove('active'));
+  
+  $('#btn-event-watch-ad').addEventListener('click', async () => {
+    const btn = $('#btn-event-watch-ad');
+    btn.disabled = true;
+    btn.textContent = 'Загрузка...';
+    
+    const ok = await watchAdsSequence(1);
+    if (ok) {
+      state.bagAds++;
+      if (state.bagAds >= 100) {
+        state.bagClaimed = true;
+        if (state.ownedPremSkins.indexOf('prem_bag') === -1) state.ownedPremSkins.push('prem_bag');
+        Sound.star(); vibrate([50, 100, 50]);
+        toast('🎉 Ты получил скин «Пакетик»!', 4000);
+      }
+      save();
+      renderEvent();
+    } else {
+      btn.disabled = false;
+      btn.textContent = `▶ Смотреть рекламу (${leftToWatch} осталось)`;
+    }
+  });
+}
+
 // ===== BIND =====
 function bind(id, evt, h){ const el=document.getElementById(id); if (el) el.addEventListener(evt, h); }
 bind('btn-play','click',function(){ Sound.resume(); startLevel(state.level,{daily:false}); });
 bind('btn-daily','click',function(){ Sound.resume(); if (!canPlayDaily()){ toast('Сегодня уже пройдено!'); return; } const lvl=Math.max(15,Math.floor(state.level*0.7)); startLevel(lvl,{daily:true}); });
 bind('btn-daily-gift','click',function(){ if (state.level<12){ toast('Ежедневные подарки откроются на 12 уровне (сейчас '+state.level+')'); return; } $('#gift-status').classList.remove('warn'); renderGifts(); $('#overlay-gifts').classList.add('active'); });
 bind('btn-battlepass','click',function(){ renderBP(); setupBPTabs(); bpUpdateStats(); $('#overlay-bp').classList.add('active'); });
+bind('btn-menu2','click',function(){ showScreen('menu2'); });
+bind('btn-menu2-back','click',function(){ showScreen('menu'); });
+bind('btn-menu2-play','click',function(){ Sound.resume(); startLevel(state.level,{daily:false}); });
+bind('btn-menu2-event','click',function(){ renderEvent(); $('#overlay-event').classList.add('active'); });
+bind('btn-event-close','click',function(){ $('#overlay-event').classList.remove('active'); });
 bind('btn-inventory','click',function(){
   state.currentInventoryTab = 'skins';
   $$('#inventory-tabs .tab').forEach(function(t){ t.classList.remove('active'); });
@@ -1843,4 +1982,4 @@ function init(){
 init();
 </script>
 </body>
-</html>
+  </html>
