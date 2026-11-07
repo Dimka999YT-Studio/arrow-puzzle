@@ -239,6 +239,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sa
 .event-stock b{color:var(--gold)}
 .sold-out-text{font-size:16px;font-weight:800;color:var(--danger);line-height:1.4}
 .sold-out-text small{display:block;font-size:13px;color:var(--muted);font-weight:500;margin-top:6px}
+/* Кликер */
+#clicker-area{position:relative;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,#1a2233,#0a0e14);border:4px solid #58a6ff;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;box-shadow:0 0 30px rgba(88,166,255,0.3);transition:transform .05s;flex-shrink:0}
+#clicker-area:active{transform:scale(0.95)}
+.clicker-float{position:absolute;color:#58a6ff;font-weight:800;font-size:20px;pointer-events:none;animation:floatUp .8s ease-out forwards}
+@keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-50px);opacity:0}}
 </style>
 </head>
 <body>
@@ -274,6 +279,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sa
     <p class="tagline">Особые события и активности</p>
     <button class="btn btn-primary btn-block" id="btn-menu2-play">▶ Играть</button>
     <button class="btn btn-gold btn-block" id="btn-menu2-event">🎆 Лимитированный скин</button>
+    <button class="btn btn-block" id="btn-menu2-clicker">🌌 Interstitial Galaxy</button>
+    <button class="btn btn-block" id="btn-menu2-cosmos-shop">🛒 Космический магазин</button>
     <button class="btn btn-block" id="btn-menu2-back" style="margin-top:10px">← Назад</button>
   </div>
 </div>
@@ -285,6 +292,45 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sa
     <button class="action-btn" id="btn-undo"><span class="action-icon">↶</span><span class="action-label">Отменить</span><span class="action-count" id="undo-count">0</span></button>
     <button class="action-btn" id="btn-hint"><span class="action-icon">💡</span><span class="action-label">Подсказка</span><span class="action-count" id="hint-count">0</span></button>
     <button class="action-btn" id="btn-restart"><span class="action-icon">↺</span><span class="action-label">Заново</span></button>
+  </div>
+</div>
+
+<div class="screen" id="screen-clicker">
+  <div class="panel">
+    <div class="panel-header">
+      <button class="btn btn-icon" id="btn-clicker-back">←</button>
+      <h2>🌌 Interstitial Galaxy</h2>
+      <div class="crystals-display" style="padding:6px 12px;font-size:13px"><span>🌌</span><span id="clicker-cosmos">0</span></div>
+    </div>
+    <div class="panel-body" style="align-items:center;justify-content:center;">
+      <div id="clicker-area">
+        <div style="font-size:60px;">🌌</div>
+      </div>
+      <p style="margin-top:20px;color:var(--muted);font-size:14px;" id="clicker-progress">0 / 100 кликов</p>
+    </div>
+    <div class="game-footer">
+      <button class="action-btn" id="btn-clicker-shop">
+        <span class="action-icon">🛒</span>
+        <span class="action-label">Магазин</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-cosmos-shop">
+  <div class="panel">
+    <div class="panel-header">
+      <button class="btn btn-icon" id="btn-cosmos-shop-back">←</button>
+      <h2>🛒 Космический магазин</h2>
+      <div class="crystals-display" style="padding:6px 12px;font-size:13px"><span>🌌</span><span id="shop-cosmos">0</span></div>
+    </div>
+    <div class="tabs" id="cosmos-shop-tabs">
+      <button class="tab active" data-tab="skins">Скины</button>
+      <button class="tab" data-tab="themes">Темы</button>
+    </div>
+    <div class="panel-body">
+      <div class="shop-grid" id="cosmos-shop-grid"></div>
+    </div>
   </div>
 </div>
 
@@ -302,7 +348,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sa
   <div class="setting-row"><div><div class="setting-label">Звуки</div><div class="setting-desc">Клики, полёты, победы</div></div><div class="toggle on" id="toggle-sound"></div></div>
   <div class="setting-row"><div><div class="setting-label">Вибрация</div><div class="setting-desc">Тактильный отклик</div></div><div class="toggle on" id="toggle-vibration"></div></div>
   <div class="setting-row"><div><div class="setting-label">Показывать путь</div><div class="setting-desc">Подсвечивать линию полёта</div></div><div class="toggle on" id="toggle-path"></div></div>
-  <div class="setting-row" style="margin-top:20px"><div><div class="setting-label">Сбросить прогресс</div><div class="setting-desc">Удалить все сохранения</div></div><button class="btn" id="btn-reset" style="padding:8px 16px;font-size:13px">Сброс</button></div>
+  <div class="setting-row" style="margin-top:20px"><div><div class="setting-label">Сбросить прогресс</div><div class="setting-desc">Покупки, кристаллы и Космос останутся</div></div><button class="btn" id="btn-reset" style="padding:8px 16px;font-size:13px">Сброс</button></div>
   <div class="about-block"><div class="about-title">О игре</div><div class="about-row"><span>Разработчик</span><b>Dimka999YT Studio</b></div><div class="about-row"><span>Версия</span><b>1.9.0</b></div><div class="about-row"><span>Технологии</span><b>HTML5 · Canvas · AdsGram</b></div><div class="about-row"><span>Год</span><b>2026</b></div></div>
 </div></div></div>
 
@@ -500,6 +546,9 @@ const THEMES = {
   volcano:{bg1:'#2a0a00',bg2:'#120500',dot:'rgba(255,100,0,0.2)'},
   gift_sky:{bg1:'#1e3a5f',bg2:'#0a1520',dot:'rgba(135,206,235,0.15)'},
   black:{bg1:'#000000',bg2:'#000000',dot:'rgba(255,255,255,0.04)'},
+  cosmos_space:{bg1:'#0a0a1a',bg2:'#000000',dot:'rgba(88,166,255,0.15)'},
+  cosmos_pink:{bg1:'#2e0a1a',bg2:'#120508',dot:'rgba(247,120,186,0.15)'},
+  cosmos_white:{bg1:'#f0f0f0',bg2:'#d0d0d0',dot:'rgba(0,0,0,0.1)'},
 };
 
 const GIFT_REWARDS = [
@@ -572,8 +621,21 @@ const BP_XP_PACK_AMOUNT = 1000;
 const BP_AD_XP = 50;
 const BP_AD_LIMIT_PER_HOUR = 10;
 
-const ALL_SKINS = SHOP_ITEMS.skins.concat(DONATE_ITEMS.skins);
-const ALL_THEMES = SHOP_ITEMS.themes.concat(DONATE_ITEMS.themes).concat([{ id:'prem_gift_sky', name:'Небесная', desc:'Подарок 4-го дня', theme:'gift_sky', icon:'💙' }]);
+// Скины и темы, которых нет в магазинах за ◆ и ⭐ (их не продаёт сервер, поэтому их нет в DONATE_ITEMS)
+const ALL_SKINS = SHOP_ITEMS.skins.concat(DONATE_ITEMS.skins).concat([
+  { id:'cosmos_cardboard', name:'Картонка', desc:'Космический магазин', form:'cardboard', icon:'📦' },
+  { id:'cosmos_cloud', name:'Облачко', desc:'Космический магазин', form:'puffy', icon:'☁️' },
+  { id:'cosmos_moon', name:'Лунная', desc:'Космический магазин', form:'moon', icon:'🌙' },
+  { id:'cosmos_uv', name:'Ультрафиолет', desc:'Космический магазин', form:'uv', icon:'🟣' },
+  { id:'cosmos_pizza', name:'Пицца', desc:'Космический магазин', form:'pizza', icon:'🍕' },
+  { id:'prem_telegram', name:'Самолётик', desc:'За подписку на канал', form:'telegram', icon:'✈️' },
+]);
+const ALL_THEMES = SHOP_ITEMS.themes.concat(DONATE_ITEMS.themes).concat([
+  { id:'prem_gift_sky', name:'Небесная', desc:'Подарок 4-го дня', theme:'gift_sky', icon:'💙' },
+  { id:'cosmos_space', name:'Космическая', desc:'Космический магазин', theme:'cosmos_space', icon:'🌌' },
+  { id:'cosmos_pink', name:'Розовая', desc:'Космический магазин', theme:'cosmos_pink', icon:'🌸' },
+  { id:'cosmos_white', name:'Белая', desc:'Космический магазин', theme:'cosmos_white', icon:'⚪' },
+]);
 
 function newBP(){ return { xp:0, vip:false, claimed:{}, adLog:[], claimedTasks:{}, maxLevel:1, totalPlaySeconds:0, adsWatched:0, seasonStart:todayStr(), lastLoginBonus:null }; }
 
@@ -598,6 +660,7 @@ const state = {
   pendingBuy:null,
   bp:newBP(),
   bagAds: 0, bagClaimed: false, bagSold: 450,
+  cosmos: 0, clickerClicks: 0, clickerAdsWatched: 0, lastClickerAdTime: 0,
 };
 
 const Sound = (function(){
@@ -650,6 +713,8 @@ function save(){
       undosInventory:state.undosInventory, hintsInventory:state.hintsInventory,
       bp: state.bp,
       bagAds: state.bagAds, bagClaimed: state.bagClaimed, bagSold: state.bagSold,
+      cosmos: state.cosmos, clickerClicks: state.clickerClicks,
+      clickerAdsWatched: state.clickerAdsWatched, lastClickerAdTime: state.lastClickerAdTime,
     });
     try { localStorage.setItem(SAVE_KEY, data); } catch(e){}
     const cs = getCS();
@@ -686,6 +751,10 @@ function applySaveData(d){
   state.bagAds = d.bagAds || 0;
   state.bagClaimed = d.bagClaimed || false;
   state.bagSold = d.bagSold || 450;
+  state.cosmos = d.cosmos || 0;
+  state.clickerClicks = d.clickerClicks || 0;
+  state.clickerAdsWatched = d.clickerAdsWatched || 0;
+  state.lastClickerAdTime = d.lastClickerAdTime || 0;
 }
 // done вызывается, когда сохранение полностью загружено (включая облако Telegram).
 // Покупки с сервера нужно выдавать только после этого, иначе облачное сохранение их затрёт.
@@ -856,6 +925,12 @@ function drawShapeOnCanvas(c,cx,cy,size,form,color,time){
     case 'cloud': { c.shadowColor='#c8d0dc'; c.shadowBlur=15; c.fillStyle='#c8d0dc'; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#7d8590'; c.beginPath(); c.arc(-size*0.1,-size*0.15,size*0.3,0,Math.PI*2); c.arc(size*0.2,-size*0.05,size*0.35,0,Math.PI*2); c.arc(-size*0.15,size*0.2,size*0.28,0,Math.PI*2); c.fill(); } break;
     case 'alarm': { c.shadowColor='#f0883e'; c.shadowBlur=15; c.fillStyle='#f0883e'; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#fff'; c.beginPath(); c.arc(0,0,size*0.55,0,Math.PI*2); c.fill(); c.strokeStyle='#0a0e14'; c.lineWidth=size*0.08; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-size*0.35); c.stroke(); c.beginPath(); c.moveTo(0,0); c.lineTo(size*0.25,-size*0.05); c.stroke(); } break;
     case 'bag': { c.fillStyle='rgba(255,255,255,0.4)'; c.strokeStyle='#fff'; c.lineWidth=1.5; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.stroke(); } break;
+    case 'cardboard': { c.fillStyle='#8b5a2b'; c.shadowColor='#8b5a2b'; c.shadowBlur=10; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#c9a06a'; c.fillRect(-size*0.2,-size*0.12,size*0.5,size*0.24); } break;
+    case 'puffy': { c.fillStyle='#fff'; c.shadowColor='#fff'; c.shadowBlur=12; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.beginPath(); c.arc(-size*0.1,size*0.45,size*0.28,0,Math.PI*2); c.arc(-size*0.1,-size*0.45,size*0.28,0,Math.PI*2); c.arc(size*0.2,size*0.25,size*0.22,0,Math.PI*2); c.arc(size*0.2,-size*0.25,size*0.22,0,Math.PI*2); c.fill(); } break;
+    case 'moon': { c.fillStyle='#e0e0e0'; c.shadowColor='#e0e0e0'; c.shadowBlur=12; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#9aa0a6'; c.beginPath(); c.arc(-size*0.1,-size*0.25,size*0.12,0,Math.PI*2); c.arc(size*0.2,size*0.1,size*0.09,0,Math.PI*2); c.arc(-size*0.2,size*0.3,size*0.08,0,Math.PI*2); c.fill(); } break;
+    case 'uv': { c.fillStyle='#a371f7'; c.shadowColor='#a371f7'; c.shadowBlur=16; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='rgba(255,255,255,0.35)'; c.beginPath(); c.moveTo(size*0.7,0); c.lineTo(0,size*0.3); c.lineTo(0,-size*0.3); c.closePath(); c.fill(); } break;
+    case 'pizza': { c.fillStyle='#f4c430'; c.shadowColor='#f4c430'; c.shadowBlur=12; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#c68642'; c.fillRect(-size*0.68,-size*0.72,size*0.15,size*1.44); c.fillStyle='#c0392b'; c.beginPath(); c.arc(size*0.3,size*0.2,size*0.1,0,Math.PI*2); c.arc(size*0.1,-size*0.2,size*0.1,0,Math.PI*2); c.fill(); } break;
+    case 'telegram': { c.fillStyle='#fff'; c.shadowColor='#58a6ff'; c.shadowBlur=15; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.strokeStyle='#58a6ff'; c.lineWidth=size*0.09; c.beginPath(); c.moveTo(size*0.85,0); c.lineTo(-size*0.28,0); c.stroke(); } break;
     default: c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='rgba(255,255,255,0.22)'; c.beginPath(); c.moveTo(size*0.9,0); c.lineTo(-size*0.4,size*0.5); c.lineTo(-size*0.15,0); c.lineTo(-size*0.4,-size*0.5); c.closePath(); c.fill();
   }
   c.restore();
@@ -886,6 +961,12 @@ function drawArrowByForm(cx,cy,size,dir,color,form,alpha,scale,glow,pulse,time){
   else if (form==='cloud'){ ctx.shadowColor='#c8d0dc'; ctx.shadowBlur=18; ctx.fillStyle='#c8d0dc'; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#7d8590'; ctx.beginPath(); ctx.arc(-size*0.1,-size*0.15,size*0.3,0,Math.PI*2); ctx.arc(size*0.2,-size*0.05,size*0.35,0,Math.PI*2); ctx.arc(-size*0.15,size*0.2,size*0.28,0,Math.PI*2); ctx.fill(); }
   else if (form==='alarm'){ ctx.shadowColor='#f0883e'; ctx.shadowBlur=20; ctx.fillStyle='#f0883e'; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(0,0,size*0.55,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='#0a0e14'; ctx.lineWidth=size*0.08; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-size*0.35); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(size*0.25,-size*0.05); ctx.stroke(); }
   else if (form==='bag'){ ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  else if (form==='cardboard'){ ctx.fillStyle='#8b5a2b'; ctx.shadowColor='#8b5a2b'; ctx.shadowBlur=14; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#c9a06a'; ctx.fillRect(-size*0.2,-size*0.12,size*0.5,size*0.24); }
+  else if (form==='puffy'){ ctx.fillStyle='#fff'; ctx.shadowColor='#fff'; ctx.shadowBlur=18; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.arc(-size*0.1,size*0.45,size*0.28,0,Math.PI*2); ctx.arc(-size*0.1,-size*0.45,size*0.28,0,Math.PI*2); ctx.arc(size*0.2,size*0.25,size*0.22,0,Math.PI*2); ctx.arc(size*0.2,-size*0.25,size*0.22,0,Math.PI*2); ctx.fill(); }
+  else if (form==='moon'){ ctx.fillStyle='#e0e0e0'; ctx.shadowColor='#e0e0e0'; ctx.shadowBlur=18; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#9aa0a6'; ctx.beginPath(); ctx.arc(-size*0.1,-size*0.25,size*0.12,0,Math.PI*2); ctx.arc(size*0.2,size*0.1,size*0.09,0,Math.PI*2); ctx.arc(-size*0.2,size*0.3,size*0.08,0,Math.PI*2); ctx.fill(); }
+  else if (form==='uv'){ ctx.fillStyle='#a371f7'; ctx.shadowColor='#a371f7'; ctx.shadowBlur=24; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.moveTo(size*0.7,0); ctx.lineTo(0,size*0.3); ctx.lineTo(0,-size*0.3); ctx.closePath(); ctx.fill(); }
+  else if (form==='pizza'){ ctx.fillStyle='#f4c430'; ctx.shadowColor='#f4c430'; ctx.shadowBlur=18; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#c68642'; ctx.fillRect(-size*0.68,-size*0.72,size*0.15,size*1.44); ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.arc(size*0.3,size*0.2,size*0.1,0,Math.PI*2); ctx.arc(size*0.1,-size*0.2,size*0.1,0,Math.PI*2); ctx.fill(); }
+  else if (form==='telegram'){ ctx.fillStyle='#fff'; ctx.shadowColor='#58a6ff'; ctx.shadowBlur=22; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.strokeStyle='#58a6ff'; ctx.lineWidth=size*0.09; ctx.beginPath(); ctx.moveTo(size*0.85,0); ctx.lineTo(-size*0.28,0); ctx.stroke(); }
   else { ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill();
     if (!glow&&pulse===0){ ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,0.22)'; ctx.beginPath(); ctx.moveTo(size*0.9,0); ctx.lineTo(-size*0.4,size*0.5); ctx.lineTo(-size*0.15,0); ctx.lineTo(-size*0.4,-size*0.5); ctx.closePath(); ctx.fill(); } }
   ctx.restore();
@@ -1397,7 +1478,7 @@ function onWin(){
     $('#win-time').textContent=ts+'с';
     $('#win-sub').textContent=isP?'Идеально! (+'+rw+' ◆)':'Отличная работа (+'+rw+' ◆)';
     $('#btn-next').textContent=state.dailyMode?'В меню':'Дальше →';
-    $('#overlay-win').classList.add('active');
+    maybeShowInterstitial(function(){ $('#overlay-win').classList.add('active'); });
   } catch(e){}
 }
 function showLose(){ state.perfectThisLevel=false; Sound.lose(); updateGameHUD(); $('#overlay-lose').classList.add('active'); }
@@ -1910,7 +1991,21 @@ bind('btn-battlepass','click',function(){ renderBP(); setupBPTabs(); bpUpdateSta
 bind('btn-menu2','click',function(){ showScreen('menu2'); });
 bind('btn-menu2-back','click',function(){ showScreen('menu'); });
 bind('btn-menu2-play','click',function(){ Sound.resume(); startLevel(state.level,{daily:false}); });
-bind('btn-menu2-event','click',function(){ renderEvent(); $('#overlay-event').classList.add('active'); });
+bind('btn-menu2-event','click',function(){ renderEvent(); $('#overlay-event').classList.add('active'); loadBagSold().then(function(changed){ if (changed && $('#overlay-event').classList.contains('active')) renderEvent(); }); });
+bind('btn-menu2-clicker','click',function(){ updateClickerUI(); showScreen('clicker'); });
+bind('btn-menu2-cosmos-shop','click',function(){ resetCosmosTabs(); renderCosmosShop('skins'); showScreen('cosmos-shop'); });
+bind('btn-clicker-back','click',function(){ flushClickerSave(); showScreen('menu2'); });
+bind('btn-clicker-shop','click',function(){ flushClickerSave(); resetCosmosTabs(); renderCosmosShop('skins'); showScreen('cosmos-shop'); });
+bind('btn-cosmos-shop-back','click',function(){ showScreen('menu2'); });
+bind('cosmos-shop-tabs','click',function(e){
+  if (e.target.classList.contains('tab')){
+    $$('#cosmos-shop-tabs .tab').forEach(function(t){ t.classList.remove('active'); });
+    e.target.classList.add('active');
+    renderCosmosShop(e.target.dataset.tab);
+  }
+});
+document.addEventListener('visibilitychange',function(){ if (document.hidden) flushClickerSave(); });
+setupClicker();
 bind('btn-event-close','click',function(){ $('#overlay-event').classList.remove('active'); });
 bind('btn-inventory','click',function(){
   state.currentInventoryTab = 'skins';
@@ -1985,7 +2080,7 @@ function bindToggle(sel,key,onChange){ const el=$(sel); if (!el) return; const u
 bindToggle('#toggle-sound','sound',function(){Sound.click();});
 bindToggle('#toggle-vibration','vibration',function(){vibrate(30);});
 bindToggle('#toggle-path','showPath');
-bind('btn-reset','click',function(){ showConfirm('Точно сбросить весь прогресс?', function(ok){ if (ok){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} location.reload(); } }); });
+bind('btn-reset','click',resetGameProgress);
 bind('btn-back','click',function(){ save(); showScreen('menu'); });
 bind('btn-pause','click',function(){ $('#pause-level').textContent=state.currentLevel; $('#overlay-pause').classList.add('active'); });
 bind('btn-resume','click',function(){ $('#overlay-pause').classList.remove('active'); });
@@ -2030,9 +2125,209 @@ window.addEventListener('orientationchange',function(){ setTimeout(resizeCanvas,
 window.addEventListener('keydown',function(e){ if (state.screen!=='game') return; if (e.key==='z'||e.key==='Z'||e.key==='Backspace') undoAction(); else if (e.key==='h'||e.key==='H') hintAction(); else if (e.key==='r'||e.key==='R') startLevel(state.currentLevel,{daily:state.dailyMode}); else if (e.key==='Escape') $('#overlay-pause').classList.add('active'); });
 setInterval(function(){ if (state.screen==='game') bpAddPlayTime(1); }, 1000);
 
+// ===== МЕЖСТРАНИЧНАЯ РЕКЛАМА =====
+const INTERSTITIAL_BLOCK_ID = "int-58610";
+let interstitialCtl = null, interstitialBusy = false;
+// done(true) — реклама показана, done(false) — нет (куплено «Убрать рекламу», нет AdsGram, ошибка, таймаут).
+// done вызывается ровно один раз, поэтому экран победы не может зависнуть за рекламой.
+function showInterstitial(done){
+  if (state.specials.no_ads || !window.Adsgram || interstitialBusy){ if (done) done(false); return; }
+  interstitialBusy = true;
+  let fin = false;
+  function end(ok){ if (fin) return; fin = true; interstitialBusy = false; if (done) done(ok); }
+  setTimeout(function(){ end(false); }, 20000);
+  try {
+    if (!interstitialCtl) interstitialCtl = window.Adsgram.init({ blockId: INTERSTITIAL_BLOCK_ID });
+    interstitialCtl.show().then(function(){ end(true); }).catch(function(){ end(false); });
+  } catch(e){ end(false); }
+}
+function maybeShowInterstitial(callback){
+  let last = 0;
+  try { last = parseInt(localStorage.getItem('lastInterstitial') || '0', 10) || 0; } catch(e){}
+  if (Date.now() - last < 30 * 60 * 1000){ callback(); return; }
+  showInterstitial(function(ok){
+    if (ok){ try { localStorage.setItem('lastInterstitial', String(Date.now())); } catch(e){} }
+    callback();
+  });
+}
+
+// ===== КЛИКЕР «INTERSTITIAL GALAXY» =====
+// state.clickerClicks — клики внутри текущей сотни (0..99). 100 кликов = 1 🌌.
+let clickerSaveTimer = null;
+function scheduleClickerSave(){
+  if (clickerSaveTimer) return;
+  clickerSaveTimer = setTimeout(function(){ clickerSaveTimer = null; save(); }, 1500);
+}
+function flushClickerSave(){
+  if (clickerSaveTimer){ clearTimeout(clickerSaveTimer); clickerSaveTimer = null; save(); }
+}
+function updateClickerUI(){
+  const c = $('#clicker-cosmos'); if (c) c.textContent = state.cosmos;
+  const p = $('#clicker-progress'); if (p) p.textContent = state.clickerClicks + ' / 100 кликов';
+}
+function maybeClickerAd(){
+  if (Date.now() - state.lastClickerAdTime < 30000) return; // 30 с между рекламами
+  showInterstitial(function(ok){
+    if (ok){ state.lastClickerAdTime = Date.now(); state.clickerAdsWatched++; save(); }
+  });
+}
+function onClickerTap(e){
+  state.clickerClicks++;
+  vibrate(6);
+  const area = $('#clicker-area');
+  const rect = area.getBoundingClientRect();
+  const div = document.createElement('div');
+  div.className = 'clicker-float';
+  div.textContent = '+1';
+  div.style.left = ((e.clientX || rect.left + rect.width/2) - rect.left - 10) + 'px';
+  div.style.top = ((e.clientY || rect.top + rect.height/2) - rect.top - 10) + 'px';
+  area.appendChild(div);
+  setTimeout(function(){ div.remove(); }, 800);
+  if (state.clickerClicks >= 100){
+    state.clickerClicks = 0;
+    state.cosmos++;
+    Sound.star(); toast('+1 🌌');
+    save();
+  } else {
+    if (state.clickerClicks % 25 === 0) maybeClickerAd();
+    scheduleClickerSave();
+  }
+  updateClickerUI();
+}
+function setupClicker(){ // слушатель вешается один раз при старте, а не при каждом открытии экрана
+  const area = $('#clicker-area');
+  if (area) area.addEventListener('click', onClickerTap);
+}
+
+// ===== КОСМИЧЕСКИЙ МАГАЗИН =====
+const COSMOS_SHOP_ITEMS = {
+  skins: [
+    { id:'cosmos_cardboard', name:'Картонка', price:3, form:'cardboard', icon:'📦' },
+    { id:'cosmos_cloud', name:'Облачко', price:10, form:'puffy', icon:'☁️' },
+    { id:'cosmos_moon', name:'Лунная', price:30, form:'moon', icon:'🌙' },
+    { id:'cosmos_uv', name:'Ультрафиолет', price:79, form:'uv', icon:'🟣' },
+    { id:'cosmos_pizza', name:'Пицца', price:289, form:'pizza', icon:'🍕' },
+  ],
+  themes: [
+    { id:'cosmos_space', name:'Космическая', price:75, theme:'cosmos_space', icon:'🌌' },
+    { id:'cosmos_pink', name:'Розовая', price:250, theme:'cosmos_pink', icon:'🌸' },
+    { id:'cosmos_white', name:'Белая', price:300, theme:'cosmos_white', icon:'⚪' },
+  ]
+};
+let cosmosShopTab = 'skins';
+function resetCosmosTabs(){ $$('#cosmos-shop-tabs .tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab==='skins'); }); }
+function renderCosmosShop(tab){
+  if (tab) cosmosShopTab = tab;
+  tab = cosmosShopTab;
+  const cnt = $('#shop-cosmos'); if (cnt) cnt.textContent = state.cosmos;
+  const grid = $('#cosmos-shop-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const isSkins = tab === 'skins';
+  (COSMOS_SHOP_ITEMS[tab] || []).forEach(function(item){
+    const ownedList = isSkins ? state.ownedPremSkins : state.ownedPremThemes;
+    const owned = ownedList.indexOf(item.id) !== -1;
+    const active = isSkins ? state.activeSkin === item.form : state.activeTheme === item.theme;
+    const div = document.createElement('div');
+    div.className = 'shop-item' + (owned ? ' owned' : '') + (active ? ' active-item' : '');
+    const pv = document.createElement('div'); pv.className = 'shop-preview';
+    if (isSkins){
+      const mc = document.createElement('canvas');
+      const sz = 60; const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      mc.width = sz * dpr; mc.height = sz * dpr; mc.style.width = sz + 'px'; mc.style.height = sz + 'px';
+      const m = mc.getContext('2d'); m.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawShapeOnCanvas(m, sz/2, sz/2, sz*0.32, item.form, '#58a6ff');
+      pv.appendChild(mc);
+    } else {
+      const t = THEMES[item.theme] || THEMES.dark;
+      const td = document.createElement('div');
+      td.style.width = '48px'; td.style.height = '48px'; td.style.borderRadius = '10px';
+      td.style.background = 'linear-gradient(135deg, ' + t.bg1 + ', ' + t.bg2 + ')';
+      td.style.border = '1px solid rgba(255,255,255,0.1)';
+      pv.appendChild(td);
+    }
+    div.appendChild(pv);
+    const nm = document.createElement('div'); nm.className = 'shop-name'; nm.textContent = item.name; div.appendChild(nm);
+    const ds = document.createElement('div'); ds.className = 'shop-desc'; ds.textContent = owned ? 'Куплено' : (isSkins ? 'Скин' : 'Тема'); div.appendChild(ds);
+    const btn = document.createElement('button'); btn.className = 'shop-btn';
+    if (active){ btn.classList.add('active'); btn.textContent = '✓ Активен'; btn.disabled = true; }
+    else if (owned){
+      btn.classList.add('apply'); btn.textContent = 'Применить';
+      btn.addEventListener('click', function(){
+        if (isSkins) state.activeSkin = item.form; else state.activeTheme = item.theme;
+        save(); toast('Применено!'); renderCosmosShop();
+      });
+    } else {
+      btn.innerHTML = item.price + ' 🌌';
+      btn.disabled = state.cosmos < item.price;
+      btn.addEventListener('click', function(){
+        const list = isSkins ? state.ownedPremSkins : state.ownedPremThemes;
+        if (list.indexOf(item.id) !== -1 || state.cosmos < item.price) return;
+        state.cosmos -= item.price;
+        list.push(item.id);
+        save(); Sound.buy(); toast('Куплено!'); renderCosmosShop();
+      });
+    }
+    div.appendChild(btn);
+    grid.appendChild(div);
+  });
+}
+
+// ===== ПОДПИСКА НА КАНАЛ И ТИРАЖ «ПАКЕТИКА» (проверяет сервер) =====
+function checkSubscription(){
+  const initData = getInitData();
+  if (!initData) return Promise.resolve();
+  return fetch('/api/check-subscription', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ initData:initData }) })
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if (d && d.subscribed && state.ownedPremSkins.indexOf('prem_telegram') === -1){
+      state.ownedPremSkins.push('prem_telegram'); save();
+      toast('✈️ Скин «Самолётик» разблокирован!', 3500);
+    }
+  }).catch(function(){});
+}
+function loadBagSold(){
+  return fetch('/api/get-sold', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ itemId:'prem_bag' }) })
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if (d && typeof d.sold === 'number' && d.sold !== state.bagSold){ state.bagSold = d.sold; save(); return true; }
+    return false;
+  }).catch(function(){ return false; });
+}
+
+// ===== СБРОС ПРОГРЕССА =====
+// Покупки за ⭐, Космос, кристаллы и всё купленное остаются. claimedOrders тоже: иначе выданные заказы выдались бы повторно.
+function resetGameProgress(){
+  showConfirm('Сбросить прогресс? Покупки за звёзды, кристаллы и Космос останутся.', function(ok){
+    if (!ok) return;
+    const keep = {
+      crystals: state.crystals, cosmos: state.cosmos,
+      prem: state.ownedPremSkins.slice(), premThemes: state.ownedPremThemes.slice(),
+      packs: state.purchasedPacks.slice(), specials: Object.assign({}, state.specials),
+      orders: state.claimedOrders.slice()
+    };
+    const skin = ALL_SKINS.filter(function(x){ return x.form === state.activeSkin; })[0];
+    const theme = ALL_THEMES.filter(function(x){ return x.theme === state.activeTheme; })[0];
+    const skinKept = skin && keep.prem.indexOf(skin.id) !== -1;
+    const themeKept = theme && keep.premThemes.indexOf(theme.id) !== -1;
+    state.level = 1; state.currentLevel = 1; state.totalLevelsCompleted = 0;
+    state.undosInventory = 0; state.hintsInventory = 0;
+    state.ownedSkins = ['classic']; state.ownedThemes = ['dark'];
+    state.activeSkin = skinKept ? skin.form : 'classic';
+    state.activeTheme = themeKept ? theme.theme : 'dark';
+    state.crystals = keep.crystals; state.cosmos = keep.cosmos;
+    state.ownedPremSkins = keep.prem; state.ownedPremThemes = keep.premThemes;
+    state.purchasedPacks = keep.packs; state.specials = keep.specials;
+    state.claimedOrders = keep.orders;
+    save();
+    showScreen('menu');
+    toast('Прогресс сброшен');
+  });
+}
+
 function init(){
   try {
-    load(function(){ loadServerPurchases(); }); initAds();
+    load(function(){ loadServerPurchases(); checkSubscription(); loadBagSold(); }); initAds();
     if (!state.bp) state.bp = newBP();
     if (state.bp.lastLoginBonus !== todayStr()){
       state.bp.lastLoginBonus = todayStr();

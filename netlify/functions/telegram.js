@@ -16,6 +16,11 @@ const db = admin.firestore();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+// Канал для проверки подписки: '@username' или числовой id (-100...). Бот должен быть администратором канала.
+const SUBSCRIBE_CHANNEL = process.env.SUBSCRIBE_CHANNEL;
+// Тираж «Пакетика» стартует с того же числа, которое игроки видят сейчас (state.bagSold = 450).
+const BAG_START_SOLD = 450;
+const BAG_TOTAL = 1000;
 
 // Серверный каталог. Цена и название берутся ТОЛЬКО отсюда, а не от клиента,
 // иначе скин за 999 звёзд можно купить, отправив price: 1.
@@ -159,7 +164,7 @@ exports.handler = async (event) => {
         await db.runTransaction(async (t) => {
           const doc = await t.get(itemRef);
           if (!doc.exists) {
-            t.set(itemRef, { total: itemId === 'prem_bag' ? 1000 : 500, sold: 0 });
+            t.set(itemRef, itemId === 'prem_bag' ? { total: BAG_TOTAL, sold: BAG_START_SOLD } : { total: 500, sold: 0 });
           } else {
             const data = doc.data();
             if (data.sold >= data.total) throw new Error('SOLD_OUT');
@@ -241,7 +246,47 @@ exports.handler = async (event) => {
     }
   }
 
-  // 3. ВЕБХУК TELEGRAM (pre_checkout_query и successful_payment)
+  // 3. ПРОВЕРКА ПОДПИСКИ НА КАНАЛ
+  if (event.httpMethod === 'POST' && path === 'check-subscription') {
+    try {
+      const b = parseBody(event);
+      const user = verifyTelegramData(b.initData, BOT_TOKEN);
+      if (!user) return json(401, { error: 'Unauthorized' });
+      if (!SUBSCRIBE_CHANNEL) return json(200, { subscribed: false, configured: false });
+
+      const r = await tg('getChatMember', { chat_id: SUBSCRIBE_CHANNEL, user_id: user.id });
+      if (!r.ok) {
+        console.error('getChatMember failed:', r.description);
+        return json(200, { subscribed: false, error: true });
+      }
+      const st = r.result && r.result.status;
+      const subscribed = st === 'creator' || st === 'administrator' || st === 'member' ||
+        (st === 'restricted' && r.result.is_member === true);
+      return json(200, { subscribed });
+    } catch (err) {
+      console.error('check-subscription error:', err);
+      return json(500, { error: 'Server error' });
+    }
+  }
+
+  // 4. ТИРАЖ «ПАКЕТИКА» (публичные данные, подпись не нужна)
+  if ((event.httpMethod === 'POST' || event.httpMethod === 'GET') && path === 'get-sold') {
+    try {
+      const ref = db.collection('limited_skins').doc('prem_bag');
+      let snap = await ref.get();
+      if (!snap.exists) {
+        await ref.set({ total: BAG_TOTAL, sold: BAG_START_SOLD }, { merge: true });
+        snap = await ref.get();
+      }
+      const d = snap.data();
+      return json(200, { sold: d.sold || 0, total: d.total || BAG_TOTAL });
+    } catch (err) {
+      console.error('get-sold error:', err);
+      return json(500, { error: 'Server error' });
+    }
+  }
+
+  // 5. ВЕБХУК TELEGRAM (pre_checkout_query и successful_payment)
   if (event.httpMethod === 'POST' && path === 'webhook') {
     // Без секрета любой мог бы прислать поддельное «оплачено», поэтому без него не работаем.
     if (!WEBHOOK_SECRET) {
