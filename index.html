@@ -1575,13 +1575,32 @@ function confirmBuy(){
         if (data.invoiceLink){
           $('#overlay-buy').classList.remove('active');
           tg.openInvoice(data.invoiceLink, function(status){
-            if (status==='paid'){ const g=grantItem(it,'stars'); state.shopPurchases++; checkAchievements(); save(); Sound.buy(); showSuccess(it,g); renderShop(); renderDonate(); }
+            if (status==='paid'){
+              const g=grantItem(it,'stars');
+              state.shopPurchases++;
+              checkAchievements();
+              save();
+              Sound.buy();
+              showSuccess(it,g);
+              renderShop();
+              renderDonate();
+            }
             else if (status==='cancelled'){ toast('Оплата отменена'); }
             else { toast('Ошибка оплаты'); }
           });
-        } else demoBuyStars(it);
-      }).catch(function(){demoBuyStars(it);});
-    } else demoBuyStars(it);
+        } else {
+          toast('Не удалось создать счёт. Попробуйте позже.');
+          $('#btn-buy-confirm').disabled = false;
+          $('#btn-buy-confirm').textContent = 'Оплатить';
+        }
+      }).catch(function(){
+        toast('Сервер недоступен. Оплата невозможна.');
+        $('#btn-buy-confirm').disabled = false;
+        $('#btn-buy-confirm').textContent = 'Оплатить';
+      });
+    } else {
+      toast('Оплата доступна только в Telegram.');
+    }
   }
 }
 function demoBuyStars(it){
