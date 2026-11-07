@@ -628,7 +628,6 @@ const ALL_SKINS = SHOP_ITEMS.skins.concat(DONATE_ITEMS.skins).concat([
   { id:'cosmos_moon', name:'Лунная', desc:'Космический магазин', form:'moon', icon:'🌙' },
   { id:'cosmos_uv', name:'Ультрафиолет', desc:'Космический магазин', form:'uv', icon:'🟣' },
   { id:'cosmos_pizza', name:'Пицца', desc:'Космический магазин', form:'pizza', icon:'🍕' },
-  { id:'prem_telegram', name:'Самолётик', desc:'За подписку на канал', form:'telegram', icon:'✈️' },
 ]);
 const ALL_THEMES = SHOP_ITEMS.themes.concat(DONATE_ITEMS.themes).concat([
   { id:'prem_gift_sky', name:'Небесная', desc:'Подарок 4-го дня', theme:'gift_sky', icon:'💙' },
@@ -930,7 +929,6 @@ function drawShapeOnCanvas(c,cx,cy,size,form,color,time){
     case 'moon': { c.fillStyle='#e0e0e0'; c.shadowColor='#e0e0e0'; c.shadowBlur=12; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#9aa0a6'; c.beginPath(); c.arc(-size*0.1,-size*0.25,size*0.12,0,Math.PI*2); c.arc(size*0.2,size*0.1,size*0.09,0,Math.PI*2); c.arc(-size*0.2,size*0.3,size*0.08,0,Math.PI*2); c.fill(); } break;
     case 'uv': { c.fillStyle='#a371f7'; c.shadowColor='#a371f7'; c.shadowBlur=16; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='rgba(255,255,255,0.35)'; c.beginPath(); c.moveTo(size*0.7,0); c.lineTo(0,size*0.3); c.lineTo(0,-size*0.3); c.closePath(); c.fill(); } break;
     case 'pizza': { c.fillStyle='#f4c430'; c.shadowColor='#f4c430'; c.shadowBlur=12; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='#c68642'; c.fillRect(-size*0.68,-size*0.72,size*0.15,size*1.44); c.fillStyle='#c0392b'; c.beginPath(); c.arc(size*0.3,size*0.2,size*0.1,0,Math.PI*2); c.arc(size*0.1,-size*0.2,size*0.1,0,Math.PI*2); c.fill(); } break;
-    case 'telegram': { c.fillStyle='#fff'; c.shadowColor='#58a6ff'; c.shadowBlur=15; c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.strokeStyle='#58a6ff'; c.lineWidth=size*0.09; c.beginPath(); c.moveTo(size*0.85,0); c.lineTo(-size*0.28,0); c.stroke(); } break;
     default: c.beginPath(); c.moveTo(size,0); c.lineTo(-size*0.55,size*0.72); c.lineTo(-size*0.28,0); c.lineTo(-size*0.55,-size*0.72); c.closePath(); c.fill(); c.shadowBlur=0; c.fillStyle='rgba(255,255,255,0.22)'; c.beginPath(); c.moveTo(size*0.9,0); c.lineTo(-size*0.4,size*0.5); c.lineTo(-size*0.15,0); c.lineTo(-size*0.4,-size*0.5); c.closePath(); c.fill();
   }
   c.restore();
@@ -966,7 +964,6 @@ function drawArrowByForm(cx,cy,size,dir,color,form,alpha,scale,glow,pulse,time){
   else if (form==='moon'){ ctx.fillStyle='#e0e0e0'; ctx.shadowColor='#e0e0e0'; ctx.shadowBlur=18; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#9aa0a6'; ctx.beginPath(); ctx.arc(-size*0.1,-size*0.25,size*0.12,0,Math.PI*2); ctx.arc(size*0.2,size*0.1,size*0.09,0,Math.PI*2); ctx.arc(-size*0.2,size*0.3,size*0.08,0,Math.PI*2); ctx.fill(); }
   else if (form==='uv'){ ctx.fillStyle='#a371f7'; ctx.shadowColor='#a371f7'; ctx.shadowBlur=24; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.moveTo(size*0.7,0); ctx.lineTo(0,size*0.3); ctx.lineTo(0,-size*0.3); ctx.closePath(); ctx.fill(); }
   else if (form==='pizza'){ ctx.fillStyle='#f4c430'; ctx.shadowColor='#f4c430'; ctx.shadowBlur=18; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#c68642'; ctx.fillRect(-size*0.68,-size*0.72,size*0.15,size*1.44); ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.arc(size*0.3,size*0.2,size*0.1,0,Math.PI*2); ctx.arc(size*0.1,-size*0.2,size*0.1,0,Math.PI*2); ctx.fill(); }
-  else if (form==='telegram'){ ctx.fillStyle='#fff'; ctx.shadowColor='#58a6ff'; ctx.shadowBlur=22; ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill(); ctx.shadowBlur=0; ctx.strokeStyle='#58a6ff'; ctx.lineWidth=size*0.09; ctx.beginPath(); ctx.moveTo(size*0.85,0); ctx.lineTo(-size*0.28,0); ctx.stroke(); }
   else { ctx.beginPath(); ctx.moveTo(size,0); ctx.lineTo(-size*0.55,size*0.72); ctx.lineTo(-size*0.28,0); ctx.lineTo(-size*0.55,-size*0.72); ctx.closePath(); ctx.fill();
     if (!glow&&pulse===0){ ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,0.22)'; ctx.beginPath(); ctx.moveTo(size*0.9,0); ctx.lineTo(-size*0.4,size*0.5); ctx.lineTo(-size*0.15,0); ctx.lineTo(-size*0.4,-size*0.5); ctx.closePath(); ctx.fill(); } }
   ctx.restore();
@@ -1807,20 +1804,26 @@ function donateStars(a){
     } else toast('Не удалось создать счёт');
   }).catch(function(){toast('Сервер недоступен');});
 }
+// Награда выдаётся только после настоящего показа. Если AdsGram не загрузился (нет интернета, блокировщик),
+// промис отклоняется с ADS_UNAVAILABLE: раньше здесь была 3-секундная «заглушка», которая засчитывалась как просмотр.
+// Исключение — купленное «Убрать рекламу»: оно отдаёт награду без просмотра.
 function showRewardedAdPromise(){
   return new Promise(function(resolve,reject){
     if (state.specials.no_ads){ resolve(); return; }
     initAds();
-    if (!adController){
-      const ov=$('#ad-overlay'); let t=3; $('#ad-timer').textContent=t;
-      ov.classList.add('active');
-      const iv=setInterval(function(){ t--; $('#ad-timer').textContent=t; if (t<=0){ clearInterval(iv); ov.classList.remove('active'); bpAddAdWatched(); resolve(); } },1000);
-      return;
-    }
+    if (!adController){ reject(new Error('ADS_UNAVAILABLE')); return; }
     try { adController.show().then(function(){ bpAddAdWatched(); resolve(); }).catch(function(e){ reject(e); }); } catch(e){ reject(e); }
   });
 }
-function showRewardedAd(cb){ showRewardedAdPromise().then(function(){cb();}).catch(function(){toast('Реклама не досмотрена');}); }
+function adFailMessage(e){
+  return e && e.message === 'ADS_UNAVAILABLE'
+    ? 'Реклама недоступна. Проверь интернет и попробуй ещё раз'
+    : 'Реклама не досмотрена. Попробуйте ещё раз';
+}
+// cb вызывается только после успешного показа; onFail — при любой неудаче
+function showRewardedAd(cb, onFail){
+  showRewardedAdPromise().then(function(){ cb(); }, function(e){ toast(adFailMessage(e),2500); if (onFail) onFail(); });
+}
 function watchAdsSequence(count){
   return new Promise(function(resolve){
     let i=0;
@@ -1828,7 +1831,7 @@ function watchAdsSequence(count){
       if (i>=count){ resolve(true); return; }
       i++;
       if (count>1) toast('Реклама '+i+' из '+count,1500);
-      showRewardedAdPromise().then(function(){ next(); }).catch(function(){ toast('Реклама не досмотрена. Попробуй снова'); resolve(false); });
+      showRewardedAdPromise().then(function(){ next(); }, function(e){ toast(adFailMessage(e),2500); resolve(false); });
     }
     next();
   });
@@ -1930,7 +1933,26 @@ function renderEvent() {
 
   const progress = Math.min(100, state.bagAds);
   const leftToWatch = 100 - progress;
-  
+
+  if (progress >= 100) { // все 100 реклам просмотрены, но сервер ещё не подтвердил выдачу
+    content.innerHTML = `
+      <div class="event-bag-img">🛍️</div>
+      <div class="event-title">Пакетик</div>
+      <div class="event-desc">Все 100 реклам просмотрены!<br>Осталось забрать скин</div>
+      <div class="dialog-buttons" style="margin-top:20px">
+        <button class="btn btn-primary" id="btn-event-claim">🎁 Получить скин</button>
+        <button class="btn" id="btn-event-close-btn">Закрыть</button>
+      </div>
+    `;
+    $('#btn-event-close-btn').addEventListener('click', () => $('#overlay-event').classList.remove('active'));
+    $('#btn-event-claim').addEventListener('click', async () => {
+      const b = $('#btn-event-claim'); b.disabled = true; b.textContent = 'Проверяем...';
+      await claimBag();
+      renderEvent();
+    });
+    return;
+  }
+
   content.innerHTML = `
     <div class="event-bag-img">🛍️</div>
     <div class="event-title">Пакетик</div>
@@ -1967,13 +1989,8 @@ function renderEvent() {
     const ok = await watchAdsSequence(1);
     if (ok) {
       state.bagAds++;
-      if (state.bagAds >= 100) {
-        state.bagClaimed = true;
-        if (state.ownedPremSkins.indexOf('prem_bag') === -1) state.ownedPremSkins.push('prem_bag');
-        Sound.star(); vibrate([50, 100, 50]);
-        toast('🎉 Ты получил скин «Пакетик»!', 4000);
-      }
       save();
+      if (state.bagAds >= 100) await claimBag();
       renderEvent();
     } else {
       btn.disabled = false;
@@ -1992,7 +2009,7 @@ bind('btn-menu2','click',function(){ showScreen('menu2'); });
 bind('btn-menu2-back','click',function(){ showScreen('menu'); });
 bind('btn-menu2-play','click',function(){ Sound.resume(); startLevel(state.level,{daily:false}); });
 bind('btn-menu2-event','click',function(){ renderEvent(); $('#overlay-event').classList.add('active'); loadBagSold().then(function(changed){ if (changed && $('#overlay-event').classList.contains('active')) renderEvent(); }); });
-bind('btn-menu2-clicker','click',function(){ updateClickerUI(); showScreen('clicker'); });
+bind('btn-menu2-clicker','click',function(){ updateClickerUI(); prepareInterstitial(); showScreen('clicker'); });
 bind('btn-menu2-cosmos-shop','click',function(){ resetCosmosTabs(); renderCosmosShop('skins'); showScreen('cosmos-shop'); });
 bind('btn-clicker-back','click',function(){ flushClickerSave(); showScreen('menu2'); });
 bind('btn-clicker-shop','click',function(){ flushClickerSave(); resetCosmosTabs(); renderCosmosShop('skins'); showScreen('cosmos-shop'); });
@@ -2105,11 +2122,16 @@ bind('btn-lose-undo','click',function(){
   $('#overlay-lose').classList.remove('active'); updateGameHUD();
 });
 bind('btn-lose-ad','click',function(){
-  $('#overlay-lose').classList.remove('active');
+  // Окно поражения закрывается только после успешного показа. При сбое оно остаётся, продолжить нельзя.
+  const btn=$('#btn-lose-ad');
+  if (btn.disabled) return;
+  btn.disabled=true;
   showRewardedAd(function(){
+    btn.disabled=false;
+    $('#overlay-lose').classList.remove('active');
     if (state.history.length>0){ const pv=state.history.pop(); state.arrows=pv.arrows; state.movesThisLevel=pv.moves; }
     updateGameHUD(); toast('Ход отменён!');
-  });
+  }, function(){ btn.disabled=false; });
 });
 bind('btn-lose-restart','click',function(){ $('#overlay-lose').classList.remove('active'); startLevel(state.currentLevel,{daily:state.dailyMode}); });
 bind('btn-lose-menu','click',function(){ $('#overlay-lose').classList.remove('active'); save(); showScreen('menu'); });
@@ -2130,6 +2152,9 @@ const INTERSTITIAL_BLOCK_ID = "int-58610";
 let interstitialCtl = null, interstitialBusy = false;
 // done(true) — реклама показана, done(false) — нет (куплено «Убрать рекламу», нет AdsGram, ошибка, таймаут).
 // done вызывается ровно один раз, поэтому экран победы не может зависнуть за рекламой.
+function prepareInterstitial(){
+  try { if (!interstitialCtl && window.Adsgram) interstitialCtl = window.Adsgram.init({ blockId: INTERSTITIAL_BLOCK_ID }); } catch(e){}
+}
 function showInterstitial(done){
   if (state.specials.no_ads || !window.Adsgram || interstitialBusy){ if (done) done(false); return; }
   interstitialBusy = true;
@@ -2165,8 +2190,9 @@ function updateClickerUI(){
   const c = $('#clicker-cosmos'); if (c) c.textContent = state.cosmos;
   const p = $('#clicker-progress'); if (p) p.textContent = state.clickerClicks + ' / 100 кликов';
 }
-function maybeClickerAd(){
-  if (Date.now() - state.lastClickerAdTime < 30000) return; // 30 с между рекламами
+// Реклама на каждом 25-м клике (25, 50, 75, 100) без кулдауна. Две рекламы одновременно показать нельзя,
+// поэтому если предыдущая ещё на экране, этот показ пропускается. Сбой рекламы клики не трогает.
+function showClickerAd(){
   showInterstitial(function(ok){
     if (ok){ state.lastClickerAdTime = Date.now(); state.clickerAdsWatched++; save(); }
   });
@@ -2183,16 +2209,17 @@ function onClickerTap(e){
   div.style.top = ((e.clientY || rect.top + rect.height/2) - rect.top - 10) + 'px';
   area.appendChild(div);
   setTimeout(function(){ div.remove(); }, 800);
+  const adNow = state.clickerClicks % 25 === 0; // 25, 50, 75 и 100-й клик
   if (state.clickerClicks >= 100){
     state.clickerClicks = 0;
     state.cosmos++;
     Sound.star(); toast('+1 🌌');
     save();
   } else {
-    if (state.clickerClicks % 25 === 0) maybeClickerAd();
     scheduleClickerSave();
   }
   updateClickerUI();
+  if (adNow) showClickerAd();
 }
 function setupClicker(){ // слушатель вешается один раз при старте, а не при каждом открытии экрана
   const area = $('#clicker-area');
@@ -2273,18 +2300,34 @@ function renderCosmosShop(tab){
   });
 }
 
-// ===== ПОДПИСКА НА КАНАЛ И ТИРАЖ «ПАКЕТИКА» (проверяет сервер) =====
-function checkSubscription(){
+// ===== ТИРАЖ «ПАКЕТИКА» (считает сервер) =====
+// Скин выдаётся только после ответа сервера: он проверяет подпись, один раз на аккаунт и не даёт превысить тираж.
+// Прогресс (state.bagAds >= 100) при любой неудаче остаётся, и получить можно позже кнопкой в окне события.
+function claimBag(){
   const initData = getInitData();
-  if (!initData) return Promise.resolve();
-  return fetch('/api/check-subscription', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ initData:initData }) })
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(d){
-    if (d && d.subscribed && state.ownedPremSkins.indexOf('prem_telegram') === -1){
-      state.ownedPremSkins.push('prem_telegram'); save();
-      toast('✈️ Скин «Самолётик» разблокирован!', 3500);
+  if (!initData){ toast('Скин «Пакетик» можно получить только в Telegram', 3500); return Promise.resolve(false); }
+  return fetch('/api/claim-bag', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ initData:initData }) })
+  .then(function(r){ return r.json().then(function(d){ return { d:d }; }); })
+  .then(function(x){
+    const d = x.d || {};
+    if (d.success){
+      state.bagClaimed = true;
+      if (state.ownedPremSkins.indexOf('prem_bag') === -1) state.ownedPremSkins.push('prem_bag');
+      if (typeof d.sold === 'number') state.bagSold = d.sold;
+      Sound.star(); vibrate([50, 100, 50]);
+      toast('🎉 Ты получил скин «Пакетик»!', 4000);
+      save();
+      return true;
     }
-  }).catch(function(){});
+    if (d.error === 'SOLD_OUT'){
+      state.bagSold = typeof d.sold === 'number' ? d.sold : 1000; save();
+      toast('Пакетики разобрали :(', 4000);
+      return false;
+    }
+    toast('Не удалось получить скин. Попробуй позже', 3500);
+    return false;
+  })
+  .catch(function(){ toast('Сервер недоступен. Попробуй позже', 3500); return false; });
 }
 function loadBagSold(){
   return fetch('/api/get-sold', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ itemId:'prem_bag' }) })
@@ -2327,7 +2370,7 @@ function resetGameProgress(){
 
 function init(){
   try {
-    load(function(){ loadServerPurchases(); checkSubscription(); loadBagSold(); }); initAds();
+    load(function(){ loadServerPurchases(); loadBagSold(); }); initAds();
     if (!state.bp) state.bp = newBP();
     if (state.bp.lastLoginBonus !== todayStr()){
       state.bp.lastLoginBonus = todayStr();

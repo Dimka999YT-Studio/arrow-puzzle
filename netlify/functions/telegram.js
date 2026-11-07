@@ -16,8 +16,6 @@ const db = admin.firestore();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
-// Канал для проверки подписки: '@username' или числовой id (-100...). Бот должен быть администратором канала.
-const SUBSCRIBE_CHANNEL = process.env.SUBSCRIBE_CHANNEL;
 // Тираж «Пакетика» стартует с того же числа, которое игроки видят сейчас (state.bagSold = 450).
 const BAG_START_SOLD = 450;
 const BAG_TOTAL = 1000;
@@ -246,30 +244,7 @@ exports.handler = async (event) => {
     }
   }
 
-  // 3. ПРОВЕРКА ПОДПИСКИ НА КАНАЛ
-  if (event.httpMethod === 'POST' && path === 'check-subscription') {
-    try {
-      const b = parseBody(event);
-      const user = verifyTelegramData(b.initData, BOT_TOKEN);
-      if (!user) return json(401, { error: 'Unauthorized' });
-      if (!SUBSCRIBE_CHANNEL) return json(200, { subscribed: false, configured: false });
-
-      const r = await tg('getChatMember', { chat_id: SUBSCRIBE_CHANNEL, user_id: user.id });
-      if (!r.ok) {
-        console.error('getChatMember failed:', r.description);
-        return json(200, { subscribed: false, error: true });
-      }
-      const st = r.result && r.result.status;
-      const subscribed = st === 'creator' || st === 'administrator' || st === 'member' ||
-        (st === 'restricted' && r.result.is_member === true);
-      return json(200, { subscribed });
-    } catch (err) {
-      console.error('check-subscription error:', err);
-      return json(500, { error: 'Server error' });
-    }
-  }
-
-  // 4. ТИРАЖ «ПАКЕТИКА» (публичные данные, подпись не нужна)
+  // 3. ТИРАЖ «ПАКЕТИКА» (публичные данные, подпись не нужна)
   if ((event.httpMethod === 'POST' || event.httpMethod === 'GET') && path === 'get-sold') {
     try {
       const ref = db.collection('limited_skins').doc('prem_bag');
@@ -282,6 +257,38 @@ exports.handler = async (event) => {
       return json(200, { sold: d.sold || 0, total: d.total || BAG_TOTAL });
     } catch (err) {
       console.error('get-sold error:', err);
+      return json(500, { error: 'Server error' });
+    }
+  }
+
+  // 4. ПОЛУЧЕНИЕ «ПАКЕТИКА» ЗА 100 РЕКЛАМ
+  // Сервер не видит просмотры рекламы (AdsGram их ему не сообщает), поэтому «100 реклам» проверить нельзя.
+  // Зато сервер гарантирует главное: подпись Telegram, одну выдачу на аккаунт и честный тираж (не больше BAG_TOTAL).
+  if (event.httpMethod === 'POST' && path === 'claim-bag') {
+    try {
+      const b = parseBody(event);
+      const user = verifyTelegramData(b.initData, BOT_TOKEN);
+      if (!user) return json(401, { error: 'Unauthorized' });
+      const userId = String(user.id);
+
+      const itemRef = db.collection('limited_skins').doc('prem_bag');
+      const claimRef = db.collection('bag_claims').doc(userId);
+      let result;
+      await db.runTransaction(async (t) => {
+        const item = await t.get(itemRef);
+        const claim = await t.get(claimRef);
+        const sold = item.exists ? (item.data().sold || 0) : BAG_START_SOLD;
+        const total = item.exists ? (item.data().total || BAG_TOTAL) : BAG_TOTAL;
+        if (claim.exists) { result = { success: true, already: true, sold }; return; } // повторный запрос не увеличивает тираж
+        if (sold >= total) { const e = new Error('SOLD_OUT'); e.sold = sold; throw e; }
+        t.set(claimRef, { userId, claimedAt: admin.firestore.FieldValue.serverTimestamp() });
+        t.set(itemRef, { total, sold: sold + 1 }, { merge: true });
+        result = { success: true, sold: sold + 1 };
+      });
+      return json(200, result);
+    } catch (err) {
+      if (err.message === 'SOLD_OUT') return json(409, { error: 'SOLD_OUT', sold: err.sold });
+      console.error('claim-bag error:', err);
       return json(500, { error: 'Server error' });
     }
   }
