@@ -590,7 +590,7 @@ const state = {
   settings:{ sound:true, vibration:true, showPath:true },
   ownedSkins:['classic'], ownedThemes:['dark'],
   activeSkin:'classic', activeTheme:'dark',
-  ownedPremSkins:[], ownedPremThemes:[],
+  ownedPremSkins:[], ownedPremThemes:[], claimedOrders:[],
   specials:{}, purchasedPacks:[], shopPurchases:0,
   boosters:{}, pendingBooster:null,
   currentShopTab:'skins', currentDonateTab:'crystals',
@@ -644,6 +644,7 @@ function save(){
       ownedSkins:state.ownedSkins, ownedThemes:state.ownedThemes,
       activeSkin:state.activeSkin, activeTheme:state.activeTheme,
       ownedPremSkins:state.ownedPremSkins, ownedPremThemes:state.ownedPremThemes,
+      claimedOrders:state.claimedOrders,
       specials:state.specials, purchasedPacks:state.purchasedPacks,
       shopPurchases:state.shopPurchases,
       undosInventory:state.undosInventory, hintsInventory:state.hintsInventory,
@@ -670,6 +671,7 @@ function applySaveData(d){
   state.activeTheme=d.activeTheme||'dark';
   state.ownedPremSkins=d.ownedPremSkins||[];
   state.ownedPremThemes=d.ownedPremThemes||[];
+  state.claimedOrders=d.claimedOrders||[];
   state.specials=d.specials||{};
   state.purchasedPacks=d.purchasedPacks||[];
   state.shopPurchases=d.shopPurchases||0;
@@ -685,10 +687,19 @@ function applySaveData(d){
   state.bagClaimed = d.bagClaimed || false;
   state.bagSold = d.bagSold || 450;
 }
-function load(){
+// done вызывается, когда сохранение полностью загружено (включая облако Telegram).
+// Покупки с сервера нужно выдавать только после этого, иначе облачное сохранение их затрёт.
+function load(done){
+  let finished=false;
+  function fin(){ if (finished) return; finished=true; if (done) done(); }
   try { const raw=localStorage.getItem(SAVE_KEY); if (raw) applySaveData(JSON.parse(raw)); } catch(e){}
   const cs=getCS();
-  if (cs) try { cs.getItem('arrow_puzzle_save', function(err,data){ if (!err && data){ try{ const p=JSON.parse(data); applySaveData(p); try{localStorage.setItem(SAVE_KEY,data);}catch(e){} }catch(e){} } }); } catch(e){}
+  if (cs){
+    try {
+      cs.getItem('arrow_puzzle_save', function(err,data){ if (!err && data){ try{ const p=JSON.parse(data); applySaveData(p); try{localStorage.setItem(SAVE_KEY,data);}catch(e){} }catch(e){} } fin(); });
+      setTimeout(fin,4000);
+    } catch(e){ fin(); }
+  } else fin();
 }
 
 function getDifficulty(l){
@@ -1570,21 +1581,12 @@ function confirmBuy(){
     if (state.screen==='menu') $('#menu-crystals').textContent=state.crystals;
   } else {
     if (tg && tg.openInvoice){
-      fetch('/api/create-invoice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:it.id,price:it.price,title:it.name})})
+      fetch('/api/create-invoice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:it.id,price:it.price,title:it.name,initData:getInitData()})})
       .then(function(r){return r.json();}).then(function(data){
         if (data.invoiceLink){
           $('#overlay-buy').classList.remove('active');
           tg.openInvoice(data.invoiceLink, function(status){
-            if (status==='paid'){
-              const g=grantItem(it,'stars');
-              state.shopPurchases++;
-              checkAchievements();
-              save();
-              Sound.buy();
-              showSuccess(it,g);
-              renderShop();
-              renderDonate();
-            }
+            if (status==='paid'){ awaitServerDelivery(it); }
             else if (status==='cancelled'){ toast('Оплата отменена'); }
             else { toast('Ошибка оплаты'); }
           });
@@ -1639,6 +1641,61 @@ function showSuccess(it, g){
   else l.style.display='none';
   $('#overlay-success').classList.add('active');
 }
+function getInitData(){ try { return tg && tg.initData ? tg.initData : ''; } catch(e){ return ''; } }
+function findDonateItem(id){
+  const tabs=Object.keys(DONATE_ITEMS);
+  for (let i=0;i<tabs.length;i++){
+    const list=DONATE_ITEMS[tabs[i]];
+    for (let j=0;j<list.length;j++){ if (list[j].id===id) return { item:list[j], tab:tabs[i] }; }
+  }
+  return null;
+}
+// Спрашивает у сервера оплаченные покупки и выдаёт те, что ещё не выданы.
+// Сервер подтверждает оплату вебхуком от Telegram, поэтому подделать статус на клиенте нельзя.
+// Возвращает Promise со списком [{item, g}] только что выданного.
+function loadServerPurchases(){
+  const initData=getInitData();
+  if (!initData) return Promise.resolve([]);
+  return fetch('/api/get-purchases',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:initData,ack:state.claimedOrders.slice(-100)})})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(data){
+    const got=[];
+    if (!data || !Array.isArray(data.purchases)) return got;
+    data.purchases.forEach(function(p){
+      if (state.claimedOrders.indexOf(p.id)!==-1) return; // этот заказ уже выдан
+      const found=findDonateItem(p.itemId);
+      if (found){
+        const prevTab=state.currentDonateTab;
+        state.currentDonateTab=found.tab;
+        const g=grantItem(found.item,'stars');
+        state.currentDonateTab=prevTab;
+        state.shopPurchases++;
+        got.push({ item:found.item, g:g });
+      }
+      state.claimedOrders.push(p.id);
+    });
+    if (data.purchases.length){
+      checkAchievements(); save();
+      try { renderShop(); renderDonate(); if (state.screen==='menu') $('#menu-crystals').textContent=state.crystals; } catch(e){}
+    }
+    return got;
+  })
+  .catch(function(e){ console.warn('loadServerPurchases:', e); return []; });
+}
+// После статуса paid товар выдаём только когда сервер подтвердил оплату (вебхук может прийти с задержкой).
+function awaitServerDelivery(it){
+  toast('Оплата получена, проверяем...',2500);
+  let tries=0;
+  (function poll(){
+    tries++;
+    loadServerPurchases().then(function(got){
+      const hit=got.filter(function(x){ return x.item.id===it.id; })[0];
+      if (hit){ Sound.buy(); showSuccess(hit.item,hit.g); }
+      else if (tries<10){ setTimeout(poll,2000); }
+      else toast('Платёж обрабатывается. Товар появится в игре в течение минуты, перезапусти её',5000);
+    });
+  })();
+}
 function makeSupportScreen(){
   const wrap=document.createElement('div'); wrap.className='support-screen'; wrap.style.gridColumn='1/-1';
   wrap.innerHTML='<div class="support-heart">❤️</div><div class="support-title">Поддержать разработчика</div><div class="support-desc">Arrow Puzzle делается одним человеком — Dimka999YT Studio.<br>Твоя поддержка помогает выпускать обновления и фичи.</div><div class="support-amounts" id="support-amounts"><button class="support-amount" data-amount="25">25 ⭐</button><button class="support-amount" data-amount="50">50 ⭐</button><button class="support-amount" data-amount="100">100 ⭐</button><button class="support-amount" data-amount="250">250 ⭐</button><button class="support-amount" data-amount="500">500 ⭐</button><button class="support-amount" data-amount="1000">1000 ⭐</button></div><div class="support-custom"><input type="number" id="support-input" placeholder="Своя сумма" min="5" max="10000"><span style="color:#f4c430;font-weight:800;font-size:15px">⭐</span></div><button class="support-donate-btn" id="support-donate">❤️ Поддержать</button><div class="support-note">От 5 до 10 000 звёзд. Спасибо! 🙏</div>';
@@ -1658,7 +1715,7 @@ function makeSupportScreen(){
 }
 function donateStars(a){
   if (!tg || !tg.openInvoice){ toast('Оплата только в Telegram'); return; }
-  fetch('/api/create-invoice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:'support_'+Date.now(),price:a,title:'Поддержка Dimka999YT Studio'})})
+  fetch('/api/create-invoice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:'support_'+Date.now(),price:a,title:'Поддержка Dimka999YT Studio',initData:getInitData()})})
   .then(function(r){return r.json();}).then(function(data){
     if (data.invoiceLink){
       tg.openInvoice(data.invoiceLink, function(status){
@@ -1975,7 +2032,7 @@ setInterval(function(){ if (state.screen==='game') bpAddPlayTime(1); }, 1000);
 
 function init(){
   try {
-    load(); initAds();
+    load(function(){ loadServerPurchases(); }); initAds();
     if (!state.bp) state.bp = newBP();
     if (state.bp.lastLoginBonus !== todayStr()){
       state.bp.lastLoginBonus = todayStr();
