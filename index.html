@@ -1603,12 +1603,6 @@ function confirmBuy(){
     }
   }
 }
-function demoBuyStars(it){
-  const g=grantItem(it,'stars'); state.shopPurchases++;
-  checkAchievements(); save(); Sound.buy();
-  $('#overlay-buy').classList.remove('active'); showSuccess(it,g);
-  renderShop(); renderDonate();
-}
 function grantItem(it, cur){
   const g=[];
   if (cur==='crystals'){
