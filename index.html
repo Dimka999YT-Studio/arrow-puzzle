@@ -498,16 +498,6 @@ const DONATE_ITEMS = {
     { id:'prem_crystal', name:'Кристалл', desc:'Прозрачные', price:150, form:'crystal', icon:'💠' },
     { id:'prem_rainbow', name:'Радуга', desc:'Переливающиеся', price:230, form:'rainbow', icon:'🌈' },
     { id:'prem_holo', name:'Голограмма', desc:'3D-эффект', price:375, form:'holo', icon:'🔮' },
-    { id:'prem_youtube', name:'YouTube', desc:'Награда за подписку', price:999, form:'youtube', icon:'▶️' },
-    { id:'prem_flower', name:'Цветочек', desc:'Подарок 3-го дня', price:999, form:'flower', icon:'🌸' },
-    { id:'prem_nine', name:'Девятка', desc:'Подарок 9-го дня', price:999, form:'nine', icon:'9️⃣' },
-    { id:'prem_globe', name:'Глобус', desc:'Подарок 17-го дня', price:999, form:'globe', icon:'🌐' },
-    { id:'prem_cloud', name:'Туча', desc:'Подарок 18-го дня', price:999, form:'cloud', icon:'🌫' },
-    { id:'prem_alarm', name:'Будильник', desc:'Подарок 19-го дня', price:999, form:'alarm', icon:'⏰' },
-    { id:'prem_candy', name:'Конфетка', desc:'Battle Pass 9 ур.', price:999, form:'candy', icon:'🍬' },
-    { id:'prem_firework', name:'Фейерверк', desc:'Battle Pass 10 ур.', price:999, form:'firework', icon:'🎆' },
-    { id:'prem_crown', name:'Корона', desc:'Battle Pass 14 ур.', price:999, form:'crown', icon:'👑' },
-    { id:'prem_bag', name:'Пакетик', desc:'Ивентовый скин', price:999, form:'bag', icon:'🛍️' },
   ],
   themes: [
     { id:'prem_cyberpunk', name:'Киберпанк', desc:'Неон + глитч', price:59, theme:'cyberpunk', icon:'🤖' },
@@ -623,6 +613,17 @@ const BP_AD_LIMIT_PER_HOUR = 10;
 
 // Скины и темы, которых нет в магазинах за ◆ и ⭐ (их не продаёт сервер, поэтому их нет в DONATE_ITEMS)
 const ALL_SKINS = SHOP_ITEMS.skins.concat(DONATE_ITEMS.skins).concat([
+  // Награды (подарки, Battle Pass, события): в магазине за ⭐ не продаются, в инвентаре серые, пока не получены
+  { id:'prem_youtube', name:'YouTube', desc:'Награда за подписку', form:'youtube', icon:'▶️' },
+  { id:'prem_flower', name:'Цветочек', desc:'Подарок 3-го дня', form:'flower', icon:'🌸' },
+  { id:'prem_nine', name:'Девятка', desc:'Подарок 9-го дня', form:'nine', icon:'9️⃣' },
+  { id:'prem_globe', name:'Глобус', desc:'Подарок 17-го дня', form:'globe', icon:'🌐' },
+  { id:'prem_cloud', name:'Туча', desc:'Подарок 18-го дня', form:'cloud', icon:'🌫' },
+  { id:'prem_alarm', name:'Будильник', desc:'Подарок 19-го дня', form:'alarm', icon:'⏰' },
+  { id:'prem_candy', name:'Конфетка', desc:'Battle Pass 9 ур.', form:'candy', icon:'🍬' },
+  { id:'prem_firework', name:'Фейерверк', desc:'Battle Pass 10 ур.', form:'firework', icon:'🎆' },
+  { id:'prem_crown', name:'Корона', desc:'Battle Pass 14 ур.', form:'crown', icon:'👑' },
+  { id:'prem_bag', name:'Пакетик', desc:'Ивентовый скин', form:'bag', icon:'🛍️' },
   { id:'cosmos_cardboard', name:'Картонка', desc:'Космический магазин', form:'cardboard', icon:'📦' },
   { id:'cosmos_cloud', name:'Облачко', desc:'Космический магазин', form:'puffy', icon:'☁️' },
   { id:'cosmos_moon', name:'Лунная', desc:'Космический магазин', form:'moon', icon:'🌙' },
@@ -1726,6 +1727,9 @@ function findDonateItem(id){
     const list=DONATE_ITEMS[tabs[i]];
     for (let j=0;j<list.length;j++){ if (list[j].id===id) return { item:list[j], tab:tabs[i] }; }
   }
+  // скины, снятые с продажи: заказы, оплаченные раньше, всё равно должны выдаться
+  const sk=ALL_SKINS.filter(function(x){ return x.id===id; })[0]; if (sk) return { item:sk, tab:'skins' };
+  const th=ALL_THEMES.filter(function(x){ return x.id===id; })[0]; if (th) return { item:th, tab:'themes' };
   return null;
 }
 // Спрашивает у сервера оплаченные покупки и выдаёт те, что ещё не выданы.
